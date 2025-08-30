@@ -2,7 +2,7 @@ package com.connector.github.Controllers;
 import com.connector.github.models.Commit;
 import com.connector.github.models.Repository;
 import com.connector.github.models.ControllerResponse;
-import com.connector.github.services.RepoService;
+import com.connector.github.services.GithubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +13,11 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @RestController
-public class GithubRepoController {
+public class GithubController {
 
-    private final RepoService repoService;
+    private final GithubService repoService;
 
-    public GithubRepoController(RepoService repoService) {
+    public GithubController(GithubService repoService) {
         this.repoService = repoService;
     }
 

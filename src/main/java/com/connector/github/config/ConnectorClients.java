@@ -28,6 +28,10 @@ public class ConnectorClients {
         String baseUrl = env.getProperty("github.api.base-url");
         String apiKey = env.getProperty("github.token");
 
+        if (apiKey == null) {
+            System.err.println("Please add property {github.token} to application.properties");
+        }
+
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeaders(httpHeaders -> {

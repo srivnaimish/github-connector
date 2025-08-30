@@ -1,7 +1,6 @@
 package com.connector.github.services;
 
 import com.connector.github.models.Commit;
-import com.connector.github.models.GithubResponse;
 import com.connector.github.models.Repository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -10,9 +9,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -20,14 +17,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
-public class RepoService implements RepoServiceSkeleton{
+public class GithubService implements GithubServiceSkeleton {
 
     private final WebClient githubApiClient;
-    public RepoService(@Qualifier("githubWebClient") WebClient githubApiClient) {
+    public GithubService(@Qualifier("githubWebClient") WebClient githubApiClient) {
         this.githubApiClient = githubApiClient;
     }
 
-    private Mono<Throwable> handleGitHubApiError(ClientResponse response) {
+    @Override
+    public Mono<Throwable> handleApiErrors(ClientResponse response) {
         if (response.statusCode() == HttpStatus.NOT_FOUND) {
             return Mono.error(new IllegalArgumentException("No data found for requested params"));
         }
@@ -64,7 +62,7 @@ public class RepoService implements RepoServiceSkeleton{
                         .build(username))
                 .retrieve()
                 .onStatus(status -> status.isError(),
-                          response -> handleGitHubApiError(response))
+                          response -> handleApiErrors(response))
                 .bodyToFlux(Repository.class)
                 .doOnError(throwable -> System.err.println("Repositories fetch failed for " + username + ": " + throwable.getMessage()));
     }
@@ -77,7 +75,7 @@ public class RepoService implements RepoServiceSkeleton{
                                              .build(username, repository))
                 .retrieve()
                 .onStatus(status -> status.isError(),
-                          response -> handleGitHubApiError(response))
+                          response -> handleApiErrors(response))
                 .bodyToFlux(Commit.class)
                 .doOnError(throwable -> {
                     System.err.println("Commits fetch failed for repositories of " + username + ": " + throwable.getMessage());
