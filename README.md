@@ -1,6 +1,6 @@
 Spring Boot GitHub API Client
 
-This project is a Spring Boot application designed to interact with the GitHub API. It offers two primary endpoints for fetching a user's repositories and a specific repository's commits.
+This project is a Spring Boot application designed to interact with the GitHub API. It offers 3 primary endpoints for fetching a user's repositories and a specific repository's commits.
 
 1. To get started, clone the prod branch of this repository to your local machine:
 
