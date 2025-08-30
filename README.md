@@ -19,7 +19,7 @@ This project is a Spring Boot application designed to interact with the GitHub A
         GithubServiceSkeleton: Defines the skeleton for the main service.
         GithubService: Implements the skeleton, including the logic for making API calls to fetch repository and commit data with unified error handling.
 
-3. Add your github PAT token to application.properties file
+3. Add github PAT token to application.properties file
    
         github.token=<your-github-token>
 
