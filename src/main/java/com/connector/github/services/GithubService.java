@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.connector.github.models.RepositoryWithCommits;
 
 @Service
 public class GithubService implements GithubServiceSkeleton {
@@ -110,6 +111,57 @@ public class GithubService implements GithubServiceSkeleton {
         return getCommits(username, repository, page)
                 .collectList()
                 .onErrorResume(throwable -> Mono.error(throwable));
+    }
+
+    @Override
+    public Mono<List<RepositoryWithCommits>> fetchGithubUserRepositoriesWithCommits(String username, int page) {
+        return getRepositories(username, page)
+                .collectList()
+                .flatMapMany(Flux::fromIterable)
+                .flatMap(repo -> 
+                    getCommits(username, repo.getName(), 1)
+                        .collectList()
+                        .map(commits -> 
+                            RepositoryWithCommits.builder()
+                                .name(repo.getName())
+                                .fullName(repo.getFullName())
+                                .description(repo.getDescription())
+                                .url(repo.getUrl())
+                                .html_url(repo.getHtml_url())
+                                .git_url(repo.getGit_url())
+                                .isPrivate(repo.isPrivate())
+                                .owner(repo.getOwner())
+                                .commits(commits)
+                                .build()
+                        )
+                        .onErrorResume(throwable -> {
+                            if (throwable.getMessage().contains("rate limit")) {
+                                System.err.println("🚫 Rate limit hit while fetching commits for " + repo.getName() + ". Returning repo without commits.");
+                            } else {
+                                System.err.println("❌ Failed to fetch commits for repo " + repo.getName() + ": " + throwable.getMessage());
+                            }
+                            return Mono.just(
+                                RepositoryWithCommits.builder()
+                                    .name(repo.getName())
+                                    .fullName(repo.getFullName())
+                                    .description(repo.getDescription())
+                                    .url(repo.getUrl())
+                                    .html_url(repo.getHtml_url())
+                                    .git_url(repo.getGit_url())
+                                    .isPrivate(repo.isPrivate())
+                                    .owner(repo.getOwner())
+                                    .commits(List.of())
+                                    .build()
+                            );
+                        })
+                )
+                .collectList()
+                .onErrorResume(throwable -> {
+                    if (throwable.getMessage().contains("rate limit")) {
+                        System.err.println("🚫 Rate limit exceeded for repositories-with-commits endpoint");
+                    }
+                    return Mono.error(throwable);
+                });
     }
 
 }

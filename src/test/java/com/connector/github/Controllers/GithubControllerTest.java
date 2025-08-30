@@ -5,6 +5,7 @@ import com.connector.github.models.CommitAuthor;
 import com.connector.github.models.CommitDetails;
 import com.connector.github.models.ControllerResponse;
 import com.connector.github.models.Repository;
+import com.connector.github.models.RepositoryWithCommits;
 import com.connector.github.models.User;
 import com.connector.github.services.GithubService;
 import org.junit.jupiter.api.BeforeEach;

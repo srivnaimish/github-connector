@@ -1,6 +1,7 @@
 package com.connector.github.Controllers;
 import com.connector.github.models.Commit;
 import com.connector.github.models.Repository;
+import com.connector.github.models.RepositoryWithCommits;
 import com.connector.github.models.ControllerResponse;
 import com.connector.github.services.GithubService;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,19 @@ public class GithubController {
                 .map(commits ->
                         ResponseEntity.status(HttpStatus.OK)
                                 .body(new ControllerResponse<>(commits, null))
+                )
+                .onErrorResume(throwable -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(new ControllerResponse<>(null, throwable.getMessage()))
+                ));
+    }
+
+    @GetMapping("/repositories-with-commits")
+    public Mono<ResponseEntity<ControllerResponse<List<RepositoryWithCommits>>>> getGithubReposWithCommits(@RequestParam() String username,
+                                                                               @RequestParam(required = false, defaultValue = "1") int page) {
+        return repoService.fetchGithubUserRepositoriesWithCommits(username, page)
+                .map(repositoriesWithCommits ->
+                        ResponseEntity.status(HttpStatus.OK)
+                                .body(new ControllerResponse<>(repositoriesWithCommits, null))
                 )
                 .onErrorResume(throwable -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                 .body(new ControllerResponse<>(null, throwable.getMessage()))
