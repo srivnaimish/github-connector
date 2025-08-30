@@ -12,7 +12,7 @@ This project is a Spring Boot application designed to interact with the GitHub A
    
     controllers
    
-        GithubController: Contains the two GET API endpoints for fetching repositories and commits.
+        GithubController: Contains the 3 GET API endpoints for fetching repositories and commits independently and together.
    
     services
    
@@ -31,7 +31,20 @@ This project is a Spring Boot application designed to interact with the GitHub A
 
 Once the server is up and running, you can use a tool like POSTMAN to test the API endpoints.
 
-1. Fetch Repositories
+1. Fetch Repositories with last 20 commits
+   
+    This API endpoint retrieves a paginated list of repositories for a given GitHub username.
+
+        Endpoint: http://localhost:8086/github/repositories-with-commits
+        Method: GET
+        Parameters:
+        username: Your GitHub username.
+        page: The page number of results(Optional, default=1)
+        
+        Example:
+        curl --location 'http://localhost:8086/github/repositories-with-commits?username=srivnaimish&page=1'
+
+2. Fetch Repositories
    
     This API endpoint retrieves a paginated list of repositories for a given GitHub username.
 
@@ -44,7 +57,7 @@ Once the server is up and running, you can use a tool like POSTMAN to test the A
         Example:
         curl --location 'http://localhost:8086/github/repositories?username=srivnaimish&page=1'
 
-2. Fetch Commits
+3. Fetch Commits
    
     This API endpoint retrieves a paginated list of commits for a specific repository.
 
