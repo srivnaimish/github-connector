@@ -61,7 +61,7 @@ class GithubControllerTest {
         CommitAuthor commitAuthor = CommitAuthor.builder()
                 .name("Test Author")
                 .email("test@example.com")
-                .date("2023-01-01T00:00:00Z")
+                .date("2025-08-30T00:00:00Z")
                 .build();
 
         CommitDetails commitDetails = CommitDetails.builder()
@@ -70,7 +70,7 @@ class GithubControllerTest {
                 .build();
 
         testCommit = Commit.builder()
-                .sha("abc123def456")
+                .sha("abc123def")
                 .commit(commitDetails)
                 .build();
 
