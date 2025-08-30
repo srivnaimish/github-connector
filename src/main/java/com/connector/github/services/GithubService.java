@@ -33,21 +33,36 @@ public class GithubService implements GithubServiceSkeleton {
         if (response.statusCode() == HttpStatus.FORBIDDEN) {
             List<String> rateLimitRemainingStr = response.headers().header("X-RateLimit-Remaining");
             List<String> resetTimestampStr = response.headers().header("X-RateLimit-Reset");
+            List<String> rateLimitLimitStr = response.headers().header("X-RateLimit-Limit");
+            
             if (!rateLimitRemainingStr.isEmpty()) {
                 String remainingRequests = rateLimitRemainingStr.get(0);
                 String resetTimestamp = resetTimestampStr.get(0);
+                String limitRequests = rateLimitLimitStr.isEmpty() ? "5000" : rateLimitLimitStr.get(0);
+                
                 try {
-                    if (Integer.parseInt(remainingRequests) == 0) {
-                        long timestamp = Long.parseLong(resetTimestamp);
-                        ZonedDateTime resetDateTime = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault());
-
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy hh:mm a");
-                        String formattedResetTime = resetDateTime.format(formatter);
+                    int remaining = Integer.parseInt(remainingRequests);
+                    long timestamp = Long.parseLong(resetTimestamp);
+                    ZonedDateTime resetDateTime = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault());
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy hh:mm a");
+                    String formattedResetTime = resetDateTime.format(formatter);
+                    
+                    if (remaining == 0) {
                         return Mono.error(new RuntimeException("GitHub API rate limit exceeded. Retry after: " + formattedResetTime));
+                    } else if (remaining < 50) {
+                        return Mono.error(new RuntimeException("Rate limit approaching. " + remaining + "/" + limitRequests + " requests remaining. Reset at: " + formattedResetTime));
                     }
                 } catch (NumberFormatException e) {
                     System.err.println("Failed to parse rate limit header");
                 }
+            }
+        }
+
+        if (response.statusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+            List<String> retryAfterStr = response.headers().header("Retry-After");
+            if (!retryAfterStr.isEmpty()) {
+                String retryAfter = retryAfterStr.get(0);
+                return Mono.error(new RuntimeException("Secondary rate limit exceeded. Retry after " + retryAfter + " seconds"));
             }
         }
 
