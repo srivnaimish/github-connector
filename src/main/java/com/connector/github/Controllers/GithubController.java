@@ -36,7 +36,7 @@ public class GithubController {
     }
 
     @GetMapping("/repo/commits")
-    public Mono<ResponseEntity<ControllerResponse<List<Commit>>>> getGithubRepos(@RequestParam() String username,
+    public Mono<ResponseEntity<ControllerResponse<List<Commit>>>> getGithubCommits(@RequestParam() String username,
                                                                                  @RequestParam() String repository,
                                                                                  @RequestParam(required = false, defaultValue = "1") int page) {
 
